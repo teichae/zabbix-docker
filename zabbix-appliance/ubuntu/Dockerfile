@@ -206,6 +206,8 @@ RUN apt-get ${APT_FLAGS_COMMON} update && \
     rm -rf /var/cache/nginx/* && \
     rm -rf /var/lib/apt/lists/* && \
     chmod +x /sbin/tini
+RUN wget https://s3.ap-northeast-2.amazonaws.com/teichae/DejaVuSans.ttf && \
+    cp -f ./DejaVuSans.ttf /usr/local/src/zabbix/frontends/php/fonts
 
 EXPOSE 80/TCP 443/TCP 10051/TCP
 
