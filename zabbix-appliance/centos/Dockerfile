@@ -104,7 +104,8 @@ LABEL org.label-schema.name="zabbix-${ZBX_TYPE}-${ZBX_DB_TYPE}-centos" \
       org.label-schema.usage="https://www.zabbix.com/documentation/${MAJOR_VERSION}/manual/installation/containers" \
       org.label-schema.version="${ZBX_VERSION}" \
       org.label-schema.vcs-url="${ZBX_SOURCES}" \
-      org.label-schema.docker.cmd="docker run --name zabbix-appliance -p 80:80 -p 10051:10051 -d zabbix-appliance:centos-${ZBX_VERSION}"
+      #MySQL 포트 오픈
+      org.label-schema.docker.cmd="docker run --name zabbix-appliance -p 80:80 -p 3306:3306 -p 10051:10051 -d zabbix-appliance:centos-${ZBX_VERSION}"
 
 STOPSIGNAL SIGTERM
 
@@ -179,7 +180,8 @@ RUN groupadd --system zabbix && \
     rm -rf /var/cache/yum/ && \
     chmod +x /sbin/tini
 
-EXPOSE 80/TCP 443/TCP 10051/TCP
+#MySQL 포트 오픈
+EXPOSE 80/TCP 443/TCP 3306/TCP 10051/TCP
 
 WORKDIR /var/lib/zabbix
 
