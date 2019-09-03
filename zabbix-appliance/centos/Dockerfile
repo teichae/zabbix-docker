@@ -201,6 +201,8 @@ COPY ["conf/etc/zabbix/zabbix_java_gateway_logback.xml", "/etc/zabbix/"]
 COPY ["conf/usr/sbin/zabbix_java_gateway", "/usr/sbin/"]
 COPY ["docker-entrypoint.sh", "/usr/bin/"]
 
+RUN mysql -uroot -e "GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY 'passwrod';"
+
 ENV ZBX_TYPE=appliance
 
 ENTRYPOINT ["/sbin/tini", "--"]
