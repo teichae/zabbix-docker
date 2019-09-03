@@ -3,8 +3,8 @@ FROM centos:centos7 as builder
 ARG YUM_FLAGS_COMMON="-y"
 ARG YUM_FLAGS_DEV="${YUM_FLAGS_COMMON}"
 
-ARG MAJOR_VERSION=master
-ARG ZBX_VERSION=${MAJOR_VERSION}
+ARG MAJOR_VERSION=4.2
+ARG ZBX_VERSION=${MAJOR_VERSION}.1
 ARG ZBX_SOURCES=https://git.zabbix.com/scm/zbx/zabbix.git
 ENV ZBX_VERSION=${ZBX_VERSION} ZBX_SOURCES=${ZBX_SOURCES} \
     ZBX_TYPE=server ZBX_DB_TYPE=mysql ZBX_OPT_TYPE=nginx \
@@ -22,6 +22,7 @@ RUN yum ${YUM_FLAGS_DEV} install http://repo.zabbix.com/non-supported/rhel/7/x86
             gettext \
             java-1.8.0-openjdk-devel \
             libcurl-devel \
+            libevent-devel \
             libssh2-devel \
             libxml2-devel \
             make \
@@ -84,8 +85,8 @@ ARG VCS_REF
 ARG YUM_FLAGS_COMMON="-y"
 ARG YUM_FLAGS_PERSISTENT="${YUM_FLAGS_COMMON}"
 
-ARG MAJOR_VERSION=master
-ARG ZBX_VERSION=${MAJOR_VERSION}
+ARG MAJOR_VERSION=4.2
+ARG ZBX_VERSION=${MAJOR_VERSION}.1
 ARG ZBX_SOURCES=https://git.zabbix.com/scm/zbx/zabbix.git
 ENV ZBX_VERSION=${ZBX_VERSION} ZBX_SOURCES=${ZBX_SOURCES} \
     TERM=xterm MIBDIRS=/usr/share/snmp/mibs:/var/lib/zabbix/mibs MIBS=+ALL \
@@ -104,7 +105,6 @@ LABEL org.label-schema.name="zabbix-${ZBX_TYPE}-${ZBX_DB_TYPE}-centos" \
       org.label-schema.usage="https://www.zabbix.com/documentation/${MAJOR_VERSION}/manual/installation/containers" \
       org.label-schema.version="${ZBX_VERSION}" \
       org.label-schema.vcs-url="${ZBX_SOURCES}" \
-      #MySQL 포트 오픈
       org.label-schema.docker.cmd="docker run --name zabbix-appliance -p 80:80 -p 3306:3306 -p 10051:10051 -d zabbix-appliance:centos-${ZBX_VERSION}"
 
 STOPSIGNAL SIGTERM
@@ -151,6 +151,7 @@ RUN groupadd --system zabbix && \
             dejavu-sans-fonts \
             java-1.8.0-openjdk-headless \
             libcurl \
+            libevent \
             libxml2 \
             mariadb \
             mariadb-server \
@@ -180,7 +181,6 @@ RUN groupadd --system zabbix && \
     rm -rf /var/cache/yum/ && \
     chmod +x /sbin/tini
 
-#MySQL 포트 오픈
 EXPOSE 80/TCP 443/TCP 3306/TCP 10051/TCP
 
 WORKDIR /var/lib/zabbix
@@ -200,6 +200,8 @@ COPY ["conf/etc/php.d/99-zabbix.ini", "/etc/php.d/99-zabbix.ini"]
 COPY ["conf/etc/zabbix/zabbix_java_gateway_logback.xml", "/etc/zabbix/"]
 COPY ["conf/usr/sbin/zabbix_java_gateway", "/usr/sbin/"]
 COPY ["docker-entrypoint.sh", "/usr/bin/"]
+
+RUN mysql -uroot -e "GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY 'passwrod';"
 
 ENV ZBX_TYPE=appliance
 
